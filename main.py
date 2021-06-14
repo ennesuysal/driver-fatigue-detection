@@ -38,7 +38,7 @@ def main():
 
             # Yawn
             yawn.yawnDetect(frame)
-            if yawn.mar > 0.38:
+            if yawn.mar > 0.50:
                 isYawning = 1
             else:
                 isYawning = 0
@@ -54,15 +54,17 @@ def main():
                 cv2.putText(frame, "KAPALI", (frame.shape[1]-130, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
             # 10 saniyelik dilim dolduğunda perclosu hesapla
-            if time.time() - general_start > 10:
+            if time.time() - general_start >= 10:
                 perclos_value = pCLOS.calc_perclos()
 
             cv2.putText(frame, "PERCLOS: {:.2f}".format(perclos_value), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
             if perclos_value >= 80:
                 cv2.putText(frame, "Yorgun", (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+                cv2.putText(frame, "UYARI!!".format(ear), (frame.shape[1] - 150, 110),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
             else:
                 cv2.putText(frame, "Yorgun Degil", (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-
+            # esneme durumunda gözler eşik değerinin altında olması durumunda uyarı vermemsi kontrolü
             if ear >= 0.23 or isYawning == 1:
                 music_flag_eye = 0
                 if music_flag_yawn == 0 and music_flag_slope == 0:
@@ -108,13 +110,21 @@ def main():
                 cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
 
             timer_end = time.time()
+            # PERCLOSE ZAMAN AYARI
             if timer_end - general_start >= 10:
-                if yawn.yawn_counter > 1 and perclos_value >= 50 and perclos_value < 80:
+                # esneme durumu 1 den büyükse ve perclos 30 ile 80 arasında ise
+                if yawn.yawn_counter > 1 and perclos_value >= 30 and perclos_value < 80:
+                    # yawn_counter 2 ve üzeri ise direk uyarı  ver.
                     yawn_fatigue_flag = 1
                     if music_flag_slope == 0 and music_flag_eye == 0:
                         p.play()
                         music_flag_yawn = 1
                         yawn_alarm_timer = time.time()
+                elif yawn.yawn_counter == 1 and perclos_value >= 30 and perclos_value < 80:
+                    # yawnflag == 2 erken uyarı için; perclos = 50-80 , arası esneme = 1 ise
+                    yawn_fatigue_flag = 2
+                    yawn_alarm_timer = time.time()
+
                 else:
                     music_flag_yawn = 0
                     yawn_fatigue_flag = 0
@@ -123,11 +133,16 @@ def main():
                 yawn.yawn_counter = 0
                 general_start = time.time()
 
+
+
             if yawn_fatigue_flag == 1:
+                cv2.putText(frame, "UYARI!!".format(ear), (frame.shape[1] - 150, 110),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+            elif yawn_fatigue_flag == 2:
                 cv2.putText(frame, "ERKEN UYARI!!".format(ear), (frame.shape[1] - 150, 110),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
-            if timer_end - yawn_alarm_timer >= 3:
+            if timer_end - yawn_alarm_timer >= 5:
                 music_flag_yawn = 0
                 yawn_fatigue_flag = 0
                 if music_flag_eye == 0 and music_flag_slope == 0:
