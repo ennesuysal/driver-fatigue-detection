@@ -69,7 +69,8 @@ def main():
                 music_flag_eye = 0
                 if music_flag_yawn == 0 and music_flag_slope == 0:
                     p.stop()
-                short_flag_eye = 0
+                short_flag_eye = 0,
+            #     added
             else:
                 if short_flag_eye == 0:
                     short_start_eye = time.time()
