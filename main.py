@@ -69,7 +69,7 @@ def main():
                 music_flag_eye = 0
                 if music_flag_yawn == 0 and music_flag_slope == 0:
                     p.stop()
-                short_flag_eye = 0,
+                short_flag_eye = 0
             #     added
             else:
                 if short_flag_eye == 0:
@@ -83,7 +83,7 @@ def main():
                             music_flag_eye = 1
 
             if music_flag_eye == 1:
-                cv2.putText(frame, "UYARI!".format(ear), (frame.shape[1] - 150, 110),
+                cv2.putText(frame, "UYARI DENEEM!".format(ear), (frame.shape[1] - 150, 110),
                                         cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
             if angle <= 15:
                 short_flag_slope = 0
